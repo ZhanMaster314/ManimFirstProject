@@ -33,62 +33,27 @@ class demo(Scene):
         self.add(i_label)
         self.add(j_label)
         
-        v_coords = np.array([4, 1, 0])
-        w_coords = np.array([2, -1, 0])
-        
-        vec_v = Vector(v_coords, color=YELLOW)
-        vec_w = Vector(w_coords, color=PINK)
+        det_eq = MathTex(r"det \begin{bmatrix} 1 & 0 \\ 0 &   \end{bmatrix} =1").to_edge(UP, buff=0.5).add_background_rectangle()
+        self.add(det_eq)
 
-        v_label = MathTex(r"\vec{v}", color=YELLOW).next_to(vec_v.get_end(), RIGHT)
-        
-        dot_equation = MathTex(
-            r"\begin{bmatrix} 4 & 1 \end{bmatrix}",
-            
-            r"\begin{bmatrix} 2 \\ -1 \end{bmatrix}",
-        ).to_edge(UP, buff=0.5)
-        dot_equation[0].set_color(YELLOW) # The [4, 1] part
-        dot_equation[1].set_color(PINK)   # The [2, -1] part
-
-        self.add(vec_v)
-        self.add(v_label)
-        self.add(dot_equation)
-    
-        #PROJECTION 
-        unit_v = v_coords / np.linalg.norm(v_coords)
-        projection_point = np.dot(w_coords, unit_v) * unit_v
-        w_label = MathTex(r"\vec{w}", color=PINK).next_to(projection_point, DR, buff=0.1)
-        vec_w.put_start_and_end_on(ORIGIN, projection_point),
-
-        self.add(vec_w)
-        self.add(w_label)
-        
-        self.wait(2)
+        det_zero_eq=MathTex(r"det \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix} =0").to_edge(UP, buff=0.5).add_background_rectangle()
 
         #ACTION
+        self.wait(6.24)
         self.play(
-            FadeOut(vec_v),
-            FadeOut(vec_w),
-            FadeOut(v_label),
-            FadeOut(w_label)
-
-        )
-        cross_product_eq=MathTex(
-            r"\begin{bmatrix} 1 \\ 0 \end{bmatrix}",
-            r"\times" ,
-            r"\begin{bmatrix} 0 \\ 1 \end{bmatrix}",
-            r"= 1"
-        ).to_edge(UP, buff=0.5).add_background_rectangle()
-        self.play(
-            ReplacementTransform(dot_equation, cross_product_eq),
-        )
-        self.wait(2)
-        
-        
-        det_eq = MathTex(r"det \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} =1").to_edge(UP, buff=0.5).add_background_rectangle()
-        self.play(
-            ReplacementTransform(cross_product_eq, det_eq),
+            ReplacementTransform(det_eq, det_zero_eq),
         )
         self.wait(1)
+        target_matrix = [[1, 0], [0, 0]]
+        self.play(
+            plane.animate.apply_matrix(target_matrix),
+            i_hat.animate.apply_matrix(target_matrix),
+            j_hat.animate.apply_matrix(target_matrix),            
+            run_time=0.5
+        )
+        self.wait(3.5)
+
+
         
 
 
