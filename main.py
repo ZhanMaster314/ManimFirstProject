@@ -46,51 +46,27 @@ class demo(Scene):
             for i in range(num_rings)
         ])
         rings.move_to(circle.get_center())
-        
-        self.add(rings)
 
-        
+        middle_ring=rings[6]
+        self.add(rings)
         self.play(
-            LaggedStart(
-                *[
-                    ring.animate(rate_func=there_and_back).scale(1.2)
-                    for ring in rings
-                ],
-                lag_ratio=0.15,
-                run_time=1
-            )
+            middle_ring.animate.set_fill(BLACK),
+            run_time=0.01
         )
-        
-        self.wait(1)
+        self.wait(7)
+
+        two_pi_r_tex = MathTex(r"2\pi r", font_size=72).shift(RIGHT * 2+UP*1)
         self.play(
-            LaggedStart(
-                *[
-                    ring.animate(rate_func=there_and_back).scale(1.2)
-                    for ring in rings
-                ],
-                lag_ratio=0.15,
-                run_time=1
-            )
+            Write(two_pi_r_tex)
         )
-        self.wait(2)
-        # The Highlight Animation
+        self.wait(3)
+
+        dr_tex=MathTex("dr", font_size=72).shift(LEFT * 1)
         self.play(
-            LaggedStart(
-                *[
-                    # 'Indicate' highlights the object (scales it slightly and changes color)
-                    # We set the color to YELLOW and the scale_factor to 1 (if you don't want it to grow)
-                    Indicate(
-                        ring, 
-                        color=YELLOW, 
-                        scale_factor=1.05, 
-                        run_time=0.5       # Duration of the yellow flash for each ring
-                    )
-                    for ring in rings
-                ],
-                lag_ratio=0.5, # Adjust this to control how fast the "yellow" travels
-                run_time=5
-            )
+            Write(dr_tex)
         )
+        self.wait(0.5)
+
 
 
 
