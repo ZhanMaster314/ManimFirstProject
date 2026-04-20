@@ -17,8 +17,7 @@ class demo(Scene):
     def construct(self):
         radius=1.5
         num_rings = 15
-        
-        
+    
         circle = Circle(radius=radius, 
                         color=WHITE,  
                         fill_color=BLUE,
@@ -26,43 +25,15 @@ class demo(Scene):
                         ).shift(LEFT * 5)
         self.add(circle)
 
-        
-
-        label = MathTex("A")
-        label.scale(1.5)
-        label.move_to(circle.get_center())
-        self.add(label)
-        
         right_amount = 1.5
         up_amount = 2
-        
         target_position = circle.get_center() + [right_amount, up_amount, 0]
         
-        self.play(
-            label.animate.move_to(target_position),
-            run_time=1.2,
-            rate_func=smooth
-        )
-        self.wait(1)
-        #Radius
-        R_line = Line(
-            start=circle.get_center(), 
-            end=circle.get_center()+[radius,0,0], 
-            color=WHITE,
-            stroke_width=2
-        )
-        R_label=MathTex("R").next_to(R_line, UP, buff=0.1)
-        self.play(
-            Create(R_line),
-            Write(R_label)
-            )
-        self.wait(3)
-        self.play(
-            FadeOut(R_line),
-            Unwrite(R_label)
-        )
-        self.wait(2.2)
-
+        label = MathTex("A")
+        label.scale(1.5)
+        label.move_to(target_position)
+        self.add(label)
+        
         rings = VGroup(*[
             Annulus(
                 inner_radius=(radius / num_rings) * i,
@@ -76,10 +47,7 @@ class demo(Scene):
         ])
         rings.move_to(circle.get_center())
         
-        self.play(
-            Create(rings),
-            run_time=0.8
-            )
+        self.add(rings)
 
         
         self.play(
@@ -94,6 +62,35 @@ class demo(Scene):
         )
         
         self.wait(1)
+        self.play(
+            LaggedStart(
+                *[
+                    ring.animate(rate_func=there_and_back).scale(1.2)
+                    for ring in rings
+                ],
+                lag_ratio=0.15,
+                run_time=1
+            )
+        )
+        self.wait(2)
+        # The Highlight Animation
+        self.play(
+            LaggedStart(
+                *[
+                    # 'Indicate' highlights the object (scales it slightly and changes color)
+                    # We set the color to YELLOW and the scale_factor to 1 (if you don't want it to grow)
+                    Indicate(
+                        ring, 
+                        color=YELLOW, 
+                        scale_factor=1.05, 
+                        run_time=0.5       # Duration of the yellow flash for each ring
+                    )
+                    for ring in rings
+                ],
+                lag_ratio=0.5, # Adjust this to control how fast the "yellow" travels
+                run_time=5
+            )
+        )
 
 
 
