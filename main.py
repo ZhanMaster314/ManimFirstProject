@@ -15,43 +15,86 @@ DEFAULT_MOBJECT_TO_MOBJECT_BUFF=0.25
 
 class demo(Scene):
     def construct(self):
-        plane=NumberPlane()
-        i_hat=Vector([1,0,0],color=X_COLOR)
-        j_hat=Vector([0,1,0],color=Y_COLOR)
-
-        i_label=MathTex(r"\hat{i}",color=X_COLOR).next_to(i_hat,RIGHT)
-        j_label = MathTex(r"\hat{j}", color=RED).next_to(j_hat, LEFT, buff=0.1).shift(UP * 0.2)
-
-        plane.save_state()
-        i_hat.save_state()
-        j_hat.save_state()
-
-        #INITIAL STAGE
-        self.add(i_hat)
-        self.add(j_hat)
-        self.add(plane)
-        self.add(i_label)
-        self.add(j_label)
+        radius=1.5
+        num_rings = 15
         
-        det_eq = MathTex(r"det \begin{bmatrix} 1 & 0 \\ 0 &   \end{bmatrix} =1").to_edge(UP, buff=0.5).add_background_rectangle()
-        self.add(det_eq)
+        
+        circle = Circle(radius=radius, 
+                        color=WHITE,  
+                        fill_color=BLUE,
+                        fill_opacity=0.5,         
+                        ).shift(LEFT * 5)
+        self.add(circle)
 
-        det_zero_eq=MathTex(r"det \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix} =0").to_edge(UP, buff=0.5).add_background_rectangle()
+        
 
-        #ACTION
-        self.wait(6.24)
+        label = MathTex("A")
+        label.scale(1.5)
+        label.move_to(circle.get_center())
+        self.add(label)
+        
+        right_amount = 1.5
+        up_amount = 2
+        
+        target_position = circle.get_center() + [right_amount, up_amount, 0]
+        
         self.play(
-            ReplacementTransform(det_eq, det_zero_eq),
+            label.animate.move_to(target_position),
+            run_time=1.2,
+            rate_func=smooth
         )
         self.wait(1)
-        target_matrix = [[1, 0], [0, 0]]
-        self.play(
-            plane.animate.apply_matrix(target_matrix),
-            i_hat.animate.apply_matrix(target_matrix),
-            j_hat.animate.apply_matrix(target_matrix),            
-            run_time=0.5
+        #Radius
+        R_line = Line(
+            start=circle.get_center(), 
+            end=circle.get_center()+[radius,0,0], 
+            color=WHITE,
+            stroke_width=2
         )
-        self.wait(3.5)
+        R_label=MathTex("R").next_to(R_line, UP, buff=0.1)
+        self.play(
+            Create(R_line),
+            Write(R_label)
+            )
+        self.wait(3)
+        self.play(
+            FadeOut(R_line),
+            Unwrite(R_label)
+        )
+        self.wait(2.2)
+
+        rings = VGroup(*[
+            Annulus(
+                inner_radius=(radius / num_rings) * i,
+                outer_radius=(radius / num_rings) * (i + 0.8)+0.05,
+                fill_color=BLUE,
+                fill_opacity=0.5,
+                stroke_width=0,
+                
+            )
+            for i in range(num_rings)
+        ])
+        rings.move_to(circle.get_center())
+        
+        self.play(
+            Create(rings),
+            run_time=0.8
+            )
+
+        
+        self.play(
+            LaggedStart(
+                *[
+                    ring.animate(rate_func=there_and_back).scale(1.2)
+                    for ring in rings
+                ],
+                lag_ratio=0.15,
+                run_time=1
+            )
+        )
+        
+        self.wait(1)
+
 
 
         
