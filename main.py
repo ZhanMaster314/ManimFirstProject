@@ -46,10 +46,6 @@ class demo(Scene):
             for i in range(num_rings)
         ])
         rings.move_to(circle.get_center())
-
-        middle_ring=rings[6]
-        
-        middle_ring.set_fill(BLACK),
         self.add(rings)
         rings.save_state()
 
@@ -58,40 +54,52 @@ class demo(Scene):
 
         dr_tex=MathTex("dr", font_size=72).shift(LEFT * 1)
         self.add(dr_tex)
-        self.wait(2.5)
 
         #Action
-        more_num_rings=20
-        more_rings = VGroup(*[
-            Annulus(
-                inner_radius=(radius / more_num_rings) * i,
-                outer_radius=(radius / more_num_rings) * (i + 0.8)+0.05,
-                fill_color=BLUE,
-                fill_opacity=0.5,
-                stroke_width=0,
-                
-            )
-            for i in range(more_num_rings)
-        ])
-        more_rings.move_to(circle.get_center())
-        middle_more_ring=more_rings[6]
         
-        middle_more_ring.set_fill(BLACK),
-
         self.play(
-            rings.animate.become(more_rings),
-            run_time=2,
+            Unwrite(two_pi_r_tex),
+            Unwrite(dr_tex)
         )
         self.wait(1)
+
+        plus_signs = VGroup(*[MathTex("+") for _ in range(num_rings - 1)])
+        equals_sign = MathTex("=")
+
+        equals_sign.next_to(rings, RIGHT, buff=0.5)
+    
+        target_layout = VGroup()
+        for i in range(num_rings):
+            target_layout.add(rings[i].copy())
+            if i < num_rings - 1:
+                target_layout.add(plus_signs[i])
+
+
+        target_layout.arrange(RIGHT, buff=0.3)
+        target_layout.next_to(equals_sign, RIGHT, buff=0.5)
+
+        right_eq_A_tex = MathTex(r"= 2\pi r_1 dr+2\pi r_2 dr+2\pi r_3 dr+2\pi r_4 dr+2\pi r_5 dr+2\pi r_6 dr+2\pi r_7 dr+2\pi r_8 dr", font_size=72).shift(RIGHT * 2+UP*1)
+        right_eq_A_target_position = circle.get_center() + [right_amount+13.5, up_amount, 0]
+        right_eq_A_tex.move_to(right_eq_A_target_position)
+
         self.play(
-            Restore(rings),
-            run_time=2,
+            Write(equals_sign),
+            # Move each real ring to the position of its ghost counterpart
+            *[
+                rings[i].animate.move_to(target_layout[i*2].get_center()) 
+                for i in range(num_rings)
+            ],
+            # Fade in the plus signs at their ghost positions
+            LaggedStart(*[FadeIn(p) for p in plus_signs], lag_ratio=0.1),
+            Write(right_eq_A_tex),
+            run_time=1.5
         )
         self.wait(5)
-        #self.play(
-        #    Unwrite(two_pi_r_tex),
-        #    Unwrite(dr_tex)
-        #)
+        self.play(
+            Unwrite(right_eq_A_tex)
+        )
+
+        
         
 
 
