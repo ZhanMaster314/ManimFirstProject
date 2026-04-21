@@ -49,20 +49,6 @@ class demo(Scene):
         self.add(rings)
         rings.save_state()
 
-        two_pi_r_tex = MathTex(r"2\pi r", font_size=72).shift(RIGHT * 2+UP*1)
-        self.add(two_pi_r_tex)
-
-        dr_tex=MathTex("dr", font_size=72).shift(LEFT * 1)
-        self.add(dr_tex)
-
-        #Action
-        
-        self.play(
-            Unwrite(two_pi_r_tex),
-            Unwrite(dr_tex)
-        )
-        self.wait(1)
-
         plus_signs = VGroup(*[MathTex("+") for _ in range(num_rings - 1)])
         equals_sign = MathTex("=")
 
@@ -78,28 +64,91 @@ class demo(Scene):
         target_layout.arrange(RIGHT, buff=0.3)
         target_layout.next_to(equals_sign, RIGHT, buff=0.5)
 
-        right_eq_A_tex = MathTex(r"= 2\pi r_1 dr+2\pi r_2 dr+2\pi r_3 dr+2\pi r_4 dr+2\pi r_5 dr+2\pi r_6 dr+2\pi r_7 dr+2\pi r_8 dr", font_size=72).shift(RIGHT * 2+UP*1)
-        right_eq_A_target_position = circle.get_center() + [right_amount+13.5, up_amount, 0]
-        right_eq_A_tex.move_to(right_eq_A_target_position)
+        for i in range(num_rings):
+            rings[i].move_to(target_layout[i*2].get_center())
+            self.add(rings[i])
+        self.add(equals_sign)
+        for p in plus_signs:
+            self.add(p)
+
+        self.wait(1)
+
+        #BARS INTRO
+        thickness = radius / num_rings
+        bars = VGroup()
+        for i in range(num_rings):
+            # Circumference = 2 * PI * radius
+            # We use the average radius of the ring for accuracy
+            avg_radius = (i * thickness + (i + 1) * thickness) / 2
+            length = 2 * PI * avg_radius
+            
+            bar = Rectangle(
+                width=thickness, 
+                height=length, 
+                fill_color=BLUE, 
+                fill_opacity=0.5,
+                stroke_width=0
+                )
+            bar.move_to(target_layout[i*2].get_center(),aligned_edge=DOWN)
+            bars.add(bar)
+        
+        self.play(
+            *[ReplacementTransform(rings[i], bars[i]) for i in range(num_rings)],
+            run_time=2.5
+        )
+        self.wait(2)
+        self.play(Unwrite(plus_signs),
+                  Unwrite(equals_sign))
+        
+        axes = Axes(
+            x_range=[-1, 9, 1], # Range from -1 to 12
+            y_range=[-1, 9, 1], # Range from -1 to 10
+            x_length=8,         # Total width in units
+            y_length=8,          # Total height in units
+            axis_config={
+                "color": GREY,
+                "stroke_width": 2,
+                "include_numbers": False, # Keep it clean
+                "include_tip": True,
+            },
+            tips=True,
+        )
+        axes.move_to(RIGHT * 3 + UP * 2)
+
+        x_label = axes.get_x_axis_label("x")
+        y_label = axes.get_y_axis_label("y")
 
         self.play(
-            Write(equals_sign),
-            # Move each real ring to the position of its ghost counterpart
+            Create(axes),
+            Write(x_label),
+            Write(y_label)
+        )
+        fake_bars_on_axes=VGroup(*[b.copy() for b in bars])
+        fake_bars_on_axes.arrange(RIGHT, buff=0, aligned_edge=DOWN)
+
+        origin_coord = axes.c2p(0, 0)
+        fake_bars_on_axes.next_to(origin_coord, UR, buff=0, aligned_edge=DOWN)
+        
+        self.play(
             *[
-                rings[i].animate.move_to(target_layout[i*2].get_center()) 
+                bars[i].animate.move_to(fake_bars_on_axes[i].get_center()) 
                 for i in range(num_rings)
             ],
-            # Fade in the plus signs at their ghost positions
-            LaggedStart(*[FadeIn(p) for p in plus_signs], lag_ratio=0.1),
-            Write(right_eq_A_tex),
-            run_time=1.5
+            run_time=2.5
         )
-        self.wait(5)
-        self.play(
-            Unwrite(right_eq_A_tex)
-        )
-
+        largest_bar = bars[-1]
+        c_label = MathTex(r"2\pi R", color=YELLOW)
+        # Position label relative to the right side of the tallest bar
+        c_label.next_to(largest_bar, RIGHT, buff=0.2)
         
+        # Optional: Add the Radius (r) label to the base
+        r_label = MathTex("R", color=YELLOW)
+        # Position label under the very middle of the whole bar group
+        r_label.next_to(bars.get_bottom(), DOWN, buff=0.2)
+
+        self.play(Write(c_label), Write(r_label))
+        
+        self.wait(1)
         
 
 
