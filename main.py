@@ -48,24 +48,52 @@ class demo(Scene):
         rings.move_to(circle.get_center())
 
         middle_ring=rings[6]
+        
+        middle_ring.set_fill(BLACK),
         self.add(rings)
-        self.play(
-            middle_ring.animate.set_fill(BLACK),
-            run_time=0.01
-        )
-        self.wait(7)
+        rings.save_state()
 
         two_pi_r_tex = MathTex(r"2\pi r", font_size=72).shift(RIGHT * 2+UP*1)
-        self.play(
-            Write(two_pi_r_tex)
-        )
-        self.wait(3)
+        self.add(two_pi_r_tex)
 
         dr_tex=MathTex("dr", font_size=72).shift(LEFT * 1)
+        self.add(dr_tex)
+        self.wait(2.5)
+
+        #Action
+        more_num_rings=20
+        more_rings = VGroup(*[
+            Annulus(
+                inner_radius=(radius / more_num_rings) * i,
+                outer_radius=(radius / more_num_rings) * (i + 0.8)+0.05,
+                fill_color=BLUE,
+                fill_opacity=0.5,
+                stroke_width=0,
+                
+            )
+            for i in range(more_num_rings)
+        ])
+        more_rings.move_to(circle.get_center())
+        middle_more_ring=more_rings[6]
+        
+        middle_more_ring.set_fill(BLACK),
+
         self.play(
-            Write(dr_tex)
+            rings.animate.become(more_rings),
+            run_time=2,
         )
-        self.wait(0.5)
+        self.wait(1)
+        self.play(
+            Restore(rings),
+            run_time=2,
+        )
+        self.wait(5)
+        #self.play(
+        #    Unwrite(two_pi_r_tex),
+        #    Unwrite(dr_tex)
+        #)
+        
+
 
 
 
