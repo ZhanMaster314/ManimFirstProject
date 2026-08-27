@@ -15,66 +15,98 @@ DEFAULT_MOBJECT_TO_MOBJECT_BUFF=0.25
 
 class demo(Scene):
     def construct(self):
-         
-        
-        # Cylinder outer walls (closed left end, open right end)
-        cyl_left_walls = VGroup(
-            Line( LEFT * 2 + UP * 1.2, RIGHT * 1.8 + UP * 1.2),
-            Line( LEFT * 2 + DOWN * 1.2,  RIGHT * 1.8 + DOWN * 1.2),
-            Line( LEFT * 2 + UP * 1.2,  LEFT * 2 + DOWN * 1.2),
-        ).set_stroke(BLUE_C, width=4)
+         # 2. Water Pool Icon (Hydrostatics)
+        pool_base = Ellipse(width=0.6, height=0.25, color=BLUE_D, fill_opacity=0.8)
 
-        # Thick Piston Head (solid block)
-        piston_head = Rectangle(
-            height=2.32, 
-            width=0.8, 
-            fill_opacity=0.85, 
-            fill_color=GRAY_B, 
-            stroke_color=WHITE,
-            stroke_width=2
-        ).move_to( LEFT * 0.4)
-    
-        left_system = VGroup(cyl_left_walls, piston_head)
-        
-        self.wait(0.1)
+        # Constructing a drop using a Dot and a Triangle
+        drop_base = Dot(radius=0.08, color=BLUE_B)
+        drop_tip = (
+            Triangle(color=BLUE_B, fill_opacity=1.0, stroke_width=0)
+        .scale(0.09)
+        .move_to(drop_base.get_center() + UP * 0.07)
+        )
+        drop = VGroup(drop_base, drop_tip)
+        drop.move_to(pool_base.get_center() + UP * 0.2)
+
+        water_icon = VGroup(pool_base, drop)
+
+        hydrostatics_label = Text("Hydrostatics", font_size=32, color=WHITE)
+        water_icon.next_to(hydrostatics_label, LEFT, buff=0.4)
+        self.wait(0.4)
         self.play(
-            Create(left_system),
-            run_time=2
-            )
-        for _ in range(3):
-            # Move Right
-            self.play(
-                piston_head.animate.shift(RIGHT * 1.2),
-                rate_func=there_and_back, # Smooth ease-in-out movement
-                run_time=0.9
-            )
-        #Piston text
-        piston_label = Text("Piston", font_size=32, color=WHITE).shift(UP*2.5)
-        self.play(
-            Write(piston_label),
-            run_time=2
-            )
-        self.wait(0.3)
-        self.play(
-            Unwrite(piston_label),
-            FadeOut(left_system),
+            Write(hydrostatics_label),
+            FadeIn(water_icon),
             run_time=1
         )
-        #partition text
-        partition_label = Text("Partition", font_size=32, color=WHITE).shift(UP*2.5)
-        self.play(
-            Write(partition_label),
-            run_time=2
-            )
         self.wait(1)
-        #opened vessel
-        left_origin = LEFT * 3.5
-        cyl_opened_vessel_walls = VGroup(
-            Line(left_origin + LEFT * 2 + DOWN * 1.2, left_origin + RIGHT * 2 + DOWN * 1.2),
-            Line(left_origin + LEFT * 2 + UP * 1.2, left_origin + LEFT * 2 + DOWN * 1.2),
-            Line(left_origin + RIGHT * 2 + UP * 1.2, left_origin + RIGHT * 2 + DOWN * 1.2),
+        self.play(
+            Unwrite(hydrostatics_label),
+            FadeOut(water_icon),
+            run_time=1
+        )
+        problem_1_label = Text("Problem 1", font_size=32, color=WHITE)
+        problem_1_label.to_corner(UL)
+        self.play(
+            Write(problem_1_label),
+            run_time=2
+        )
+        self.wait(2.2)
 
-        ).set_stroke(BLUE_C, width=4)
+        #Draw water pool
+        bottom_of_the_pool=Line(LEFT * 2 + DOWN * 1.2,  RIGHT * 2 + DOWN * 1.2)
+        water_pool_walls = VGroup(
+            Line(LEFT * 2 + UP * 1.2,  LEFT * 2 + DOWN * 1.2),
+            bottom_of_the_pool,
+            Line( RIGHT * 2 + UP * 1.2,  RIGHT * 2 + DOWN * 1.2),
+        ).set_stroke(WHITE, width=4)
+        self.play(
+            Create(water_pool_walls),
+            run_time=2.2
+        )
+        #highlight bottom
+        self.play(
+            bottom_of_the_pool.animate.set_color(YELLOW),
+            run_time=0.7
+        )
+        area_s_label=MathTex(r"S=15m^{2}", font_size=32, color=WHITE).next_to(bottom_of_the_pool,DOWN,0.5)
+
+        self.play(
+            Write(area_s_label),
+            run_time=3
+        )
+        self.play(
+            bottom_of_the_pool.animate.set_color(WHITE),
+            run_time=1
+        )
+        self.wait(1.3)
+        #Draw water
+        left_water_rect=Rectangle(
+            height=1.2, 
+            width=2, 
+            fill_opacity=1.0,
+            fill_color=BLUE_C,
+            stroke_width=0
+        ).shift(LEFT+DOWN*0.6)
+        right_water_rect=Rectangle(
+            height=1.2, 
+            width=2, 
+            fill_opacity=1.0,
+            fill_color=BLUE_C,
+            stroke_width=0
+        ).shift(RIGHT+DOWN*0.6)
+        self.play(
+            Create(left_water_rect),
+            Create(right_water_rect),
+            run_time=1.8
+        )
+        #write h label
+        h_label=Text("h=1m", font_size=32, color=WHITE).next_to(right_water_rect,RIGHT,2)
+        self.play(
+            Write(h_label),
+            run_time=1
+        )
+        self.wait(2.3)
+        #Draw partition
         partition = Rectangle(
             height=2.32, 
             width=0.08, 
@@ -82,175 +114,186 @@ class demo(Scene):
             fill_color=RED_D, 
             stroke_color=RED_A,
             stroke_width=1.5
-        ).move_to(left_origin)
-        opened_vessel_system = VGroup(cyl_opened_vessel_walls, partition)
-        self.play(
-            Create(opened_vessel_system),
-            run_time=2
         )
-        for _ in range(2):
-            # Move Right
-            self.play(
-                partition.animate.shift(RIGHT * 1.2),
-                rate_func=there_and_back, # Smooth ease-in-out movement
-                run_time=0.9
-            )
-        self.wait(0.2)
-        #Unmovable partition
-        right_origin = RIGHT * 3.5
-
-        # Enclosed Cylinder walls (closed both ends)
-        cyl_right_walls = VGroup(
-            Line(right_origin + LEFT * 2 + UP * 1.2, right_origin + RIGHT * 2 + UP * 1.2),
-            Line(right_origin + LEFT * 2 + DOWN * 1.2, right_origin + RIGHT * 2 + DOWN * 1.2),
-            Line(right_origin + LEFT * 2 + UP * 1.2, right_origin + LEFT * 2 + DOWN * 1.2),
-            Line(right_origin + RIGHT * 2 + UP * 1.2, right_origin + RIGHT * 2 + DOWN * 1.2),
-        ).set_stroke(BLUE_C, width=4)
-
-        # Thin Disc Partition inside
-        partition = Rectangle(
-            height=2.32, 
-            width=0.08, 
-            fill_opacity=1.0, 
-            fill_color=RED_D, 
-            stroke_color=RED_A,
-            stroke_width=1.5
-        ).move_to(right_origin)
-
-        right_system = VGroup(cyl_right_walls, partition)
+        partition.set_z_index(1)
         self.play(
-            Create(right_system),
-            run_time=2
+           Create(partition) ,
+           run_time=3
         )
-        self.wait(5)
-        #half-penetrable partition text
-        half_penetrable_partition_label = Text("half-penetrable partition", font_size=32, color=WHITE).next_to(right_system,DOWN,2)
-
+        self.wait(2.7)
+        #A ? label
+        A_question_label=Text("A=?", font_size=32, color=WHITE).next_to(left_water_rect,LEFT,2)
         self.play(
-            Write(half_penetrable_partition_label),
-            run_time=2
-        )
-        self.wait(1)
-        self.play(
-            Unwrite(partition_label),
-            Unwrite(half_penetrable_partition_label),
-            FadeOut(opened_vessel_system),
-            FadeOut(right_system),
+            Write(A_question_label),
             run_time=1
         )
+        self.wait(2.3)
+        #Move partition
+        left_water_rect.save_state()
+        right_water_rect.save_state()
 
-        #Create 2 vertical cylinders m and M
-
-        #cylinder m=0
-        cyl_m_zero_walls = VGroup(
-            Line(left_origin + LEFT * 1.2 + UP * 2, left_origin + RIGHT * 1.2 + UP * 2),
-            Line(left_origin + LEFT * 1.2 + DOWN * 2, left_origin + RIGHT * 1.2 + DOWN * 2),
-            Line(left_origin + LEFT * 1.2 + UP * 2, left_origin + LEFT * 1.2 + DOWN * 2),
-            Line(left_origin + RIGHT * 1.2 + UP * 2, left_origin + RIGHT * 1.2 + DOWN * 2),
-        ).set_stroke(BLUE_C, width=4)
-        piston_m_zero_head = Rectangle(
+        final_left_water_rect=Rectangle(
+            height=2.4, 
+            width=1, 
+            fill_opacity=1.0,
+            fill_color=BLUE_C,
+        ).shift(LEFT*1.5)
+        final_right_water_rect=Rectangle(
             height=0.8, 
-            width=2.32, 
-            fill_opacity=0.85, 
-            fill_color=GRAY_B, 
-            stroke_color=WHITE,
-            stroke_width=2
-        ).move_to(left_origin + UP * 0.4)
-        m_zero_label=Text("m=0", font_size=32, color=WHITE).move_to(piston_m_zero_head)
+            width=3, 
+            fill_opacity=1.0,
+            fill_color=BLUE_C,
+        ).shift(RIGHT*0.5+DOWN*0.8)
+        self.play(
+                partition.animate.shift(LEFT),
+                Transform(left_water_rect,final_left_water_rect),
+                Transform(right_water_rect,final_right_water_rect),
+                run_time=3
+            )
+        self.wait(2.2)
+        #Write 1:3
+        one_to_three_label=Text("1 : 3", font_size=32, color=WHITE).next_to(area_s_label,DOWN,1)
+        self.play(
+            Write(one_to_three_label),
+            run_time=1
+        )
+        self.wait(3)
+        self.play(
+            Unwrite(one_to_three_label),
+            run_time=1
+        )
+        #Move partition back
+        self.play(
+                partition.animate.shift(RIGHT),
+                Restore(left_water_rect),
+                Restore(right_water_rect),
+                run_time=3
+            )
+        self.wait(4.2)
+        #write E beg
+        E_beg_label=MathTex(r"E_{\text{beg}}", font_size=48).shift(DOWN*3+LEFT*3)
+        E_fin_label=MathTex(r"E_{\text{fin}}", font_size=48).shift(DOWN*3+RIGHT)
+        self.play(
+            Write(E_beg_label),
+            run_time=1
+        )
+        self.wait(2.3)
+        self.play(
+            Write(E_fin_label),
+            run_time=1
+        )
+        self.wait(7.8)
+        #write =mgh/2
+        E_beg_value_label=MathTex(r"= \frac{mgh}{2}", font_size=48)
+        E_beg_value_label.next_to(E_beg_label, RIGHT, buff=0.15)
+        self.play(
+            Write(E_beg_value_label),
+            run_time=3
+        )
+        self.wait(4.2)
+        #write energy final 
+        E_fin_value_label=MathTex(r"= \frac{m}{2} g \frac{h_1}{2} + \frac{m}{2} g \frac{h_2}{2}", font_size=48)
+        E_fin_value_label.next_to(E_fin_label, RIGHT, buff=0.15)
+        self.play(
+            Write(E_fin_value_label),
+            run_time=4
+        )
+        self.wait(12.8)
+        #Write m label
+        m_label=MathTex(r"m = \rho S h", font_size=48)
+        m_label.next_to(h_label,UP,buff=0.8)
+        self.play(
+            Write(m_label),
+            run_time=3
+        )
+        self.wait(5.6)
+        #Move partition
+        self.play(
+                partition.animate.shift(LEFT),
+                Transform(left_water_rect,final_left_water_rect),
+                Transform(right_water_rect,final_right_water_rect),
+                run_time=1
+            )
+        #Write h1 h2
+        h1_label=MathTex(r"h_1", font_size=48)
+        h1_label.next_to(final_left_water_rect, UP, buff=0.2)
 
-        m_zero_system=VGroup(cyl_m_zero_walls,piston_m_zero_head,m_zero_label)
+        h2_label=MathTex(r"h_2", font_size=48)
+        h2_label.next_to(final_right_water_rect, UP, buff=0.2)
+        self.play(
+            Write(h1_label),
+            Write(h2_label),
+            run_time=1
+        )
+        self.wait(9.7)
+        #text fade out
+        self.play(
+            Unwrite(area_s_label),
+            Unwrite(h_label),
+            Unwrite(A_question_label),
+            Unwrite(E_beg_label),
+            Unwrite(E_beg_value_label),
+            Unwrite(E_fin_label),
+            Unwrite(E_fin_value_label),
+            run_time=1
+        )
+        #V=const
+        V_const_label=MathTex(r"V = const", font_size=48).shift(DOWN*3+LEFT*4)
+        self.play(
+            Write(V_const_label),
+            run_time=1
+        )
+        self.wait(2.3)
+        hS_equation=MathTex(r"\frac{hS}{2} =\frac{h_1 S}{4} =\frac{h_2 3S}{4}", font_size=48)
+        hS_equation.next_to(V_const_label,RIGHT, buff=1)
+        self.play(
+            Write(hS_equation),
+            run_time=3
+        )
+        self.wait(14)
+        self.play(
+            Unwrite(hS_equation),
+            Unwrite(V_const_label),
+            run_time=1.5
+        )
+        #A=E_fin-E_beg
+        A_label=MathTex(r"A=", font_size=48).shift(DOWN*3+LEFT*1)
+        A_value_1_label=MathTex(r"E_{\text{fin}}-E_{\text{beg}}", font_size=48).next_to(A_label,RIGHT,buff=0.2)
+        A_value_2_label=MathTex(r"\frac{\rho g S h^{2}}{6}", font_size=48).next_to(A_label,RIGHT,buff=0.2)
+        A_value_3_label=MathTex(r"25 kJ", font_size=48).next_to(A_label,RIGHT,buff=0.2)
 
-        #cylinder M
-        cyl_M_walls = VGroup(
-            Line(right_origin + LEFT * 1.2 + UP * 2, right_origin + RIGHT * 1.2 + UP * 2),
-            Line(right_origin + LEFT * 1.2 + DOWN * 2, right_origin + RIGHT * 1.2 + DOWN * 2),
-            Line(right_origin + LEFT * 1.2 + UP * 2, right_origin + LEFT * 1.2 + DOWN * 2),
-            Line(right_origin + RIGHT * 1.2 + UP * 2, right_origin + RIGHT * 1.2 + DOWN * 2),
-        ).set_stroke(BLUE_C, width=4)
-        piston_M_head = Rectangle(
-            height=0.8, 
-            width=2.32, 
-            fill_opacity=0.85, 
-            fill_color=GRAY_B, 
-            stroke_color=WHITE,
-            stroke_width=2
-        ).move_to(right_origin + UP * 0.4)
-        M_label=Text("M", font_size=32, color=WHITE).move_to(piston_M_head)
-
-        M_system=VGroup(cyl_M_walls,piston_M_head,M_label)
 
         self.play(
-            Create(m_zero_system),
-            Create(M_system),
+            Write(A_label),
+            Write(A_value_1_label),
+            run_time=3
+        )
+        self.wait(3.3)
+        self.play(
+            ReplacementTransform(A_value_1_label,A_value_2_label),
             run_time=3
 
         )
-        self.wait(5)
+        self.wait(3.2)
         self.play(
-            FadeOut(m_zero_label),
-            FadeOut(M_label),
+            ReplacementTransform(A_value_2_label,A_value_3_label),
             run_time=1
-        )
-        #Arrows intro 
-        arrow_left = Arrow(
-            start=left_origin + DOWN * 0.6,
-            end=left_origin + UP * 1.4,
-            color=YELLOW,
-            buff=0,
-            max_tip_length_to_length_ratio=0.2
-        )
-        q_label_left = MathTex("Q", color=YELLOW, font_size=36).next_to(arrow_left, RIGHT, buff=0.15)
 
-        arrow_right = Arrow(
-            start=right_origin + DOWN * 0.6,
-            end=right_origin + UP * 1.4,
-            color=YELLOW,
-            buff=0,
-            max_tip_length_to_length_ratio=0.2
         )
-        q_label_right = MathTex("Q", color=YELLOW, font_size=36).next_to(arrow_right, RIGHT, buff=0.15)
-
-        # Red 'X' indicating no heat transfer
-        cross = VGroup(
-            Line(UP * 0.25 + LEFT * 0.25, DOWN * 0.25 + RIGHT * 0.25),
-            Line(DOWN * 0.25 + LEFT * 0.25, UP * 0.25 + RIGHT * 0.25)
-        ).set_stroke(RED, width=5).move_to(arrow_right.get_center())
-
-
-        self.play(
-            Create(arrow_left),
-            Create(q_label_left),
-            Create(arrow_right),
-            Create(q_label_right),
-            Create(cross),
-            run_time=2
-            
-        )
-        self.wait(1)
-        self.play(
-            FadeOut(arrow_left),
-            FadeOut(q_label_left),
-            FadeOut(arrow_right),
-            FadeOut(q_label_right),
-            FadeOut(cross),
-            run_time=1
-        )
-        #piston oscillate
-        for _ in range(3):
-            # Move Right
-            self.play(
-                piston_m_zero_head.animate.shift(UP * 1),
-                rate_func=there_and_back, # Smooth ease-in-out movement
-                run_time=1
-            )
-        for _ in range(2):
-            # Move Right
-            self.play(
-                piston_M_head.animate.shift(UP * 1),
-                rate_func=there_and_back, # Smooth ease-in-out movement
-                run_time=1.5
-            )
         self.wait(3)
+
+
+
+
+
+
+
+
+
+        
+        
+
+
 
 
 
